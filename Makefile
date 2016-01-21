@@ -1,6 +1,6 @@
 DOCKER = docker
 REPO = git@github.com:aptible/docker-mongodb.git
-TAGS = 2.6
+TAGS = 2.6 3.2
 
 all: release
 
