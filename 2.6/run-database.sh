@@ -2,9 +2,28 @@
 
 . /usr/bin/utilities.sh
 
-command="/usr/bin/mongod --dbpath "$DATA_DIRECTORY" --auth"
+SSL_MODE="preferSSL"
+
+function startMongod() {
+  SUBJ="/C=US/ST=New York/L=New York/O=Example/CN=mongodb.example.com"
+  if [ ! -f "$SSL_DIRECTORY"/mongodb.crt ] && [ ! -f "$SSL_DIRECTORY"/mongodb.key ]; then
+    OPTS="req -nodes -new -x509 -sha256"
+    openssl $OPTS -subj "$SUBJ" -keyout "$SSL_DIRECTORY"/mongodb.key -out "$SSL_DIRECTORY"/mongodb.crt 2> /dev/null
+  fi
+
+  cat "$SSL_DIRECTORY/mongodb.key" "$SSL_DIRECTORY/mongodb.crt" > "$SSL_DIRECTORY/mongodb.pem"
+  exec mongod --dbpath "$DATA_DIRECTORY" --auth --sslMode "$SSL_MODE" --sslPEMKeyFile "$SSL_DIRECTORY/mongodb.pem"
+}
+
 dump_directory="mongodump"
 if [[ "$1" == "--initialize" ]]; then
+  mkdir -p $SSL_DIRECTORY
+
+  if [ -n "$SSL_CERTIFICATE" ] && [ -n "$SSL_KEY" ]; then
+    echo "$SSL_CERTIFICATE" > "$SSL_DIRECTORY"/mongodb.crt
+    echo "$SSL_KEY" > "$SSL_DIRECTORY"/mongodb.key
+  fi
+
   PID_PATH=/tmp/mongod.pid
   mongod --dbpath "$DATA_DIRECTORY" --fork --logpath /dev/null --pidfilepath "$PID_PATH"
   mongo db --eval "db.createUser({\"user\":\"${USERNAME:-aptible}\",\"pwd\":\"$PASSPHRASE\",\"roles\":[\"dbOwner\"]}, {\"w\":1,\"j\":true})"
@@ -16,7 +35,7 @@ if [[ "$1" == "--initialize" ]]; then
 elif [[ "$1" == "--client" ]]; then
   [ -z "$2" ] && echo "docker run -it aptible/mongodb --client mongodb://..." && exit
   parse_url "$2"
-  mongo --host="$host" --port="${port:-27017}" --username="$user" --password="$password" "$database"
+  mongo --host="$host" --port="${port:-27017}" --username="$user" --password="$password" --ssl --sslCAFile /etc/ssl/certs/ca-certificates.crt "$database"
 
 elif [[ "$1" == "--dump" ]]; then
   [ -z "$2" ] && echo "docker run aptible/mongodb --dump mongodb://... > dump.mongo" && exit
@@ -46,9 +65,9 @@ elif [[ "$1" == "--readonly" ]]; then
   #
   # With all of that said, leaving off read-only mode for now.
   echo "This image does not support read-only mode. Starting database normally."
-  $command
+  startMongod
 
 else
-  $command
+  startMongod
 
 fi

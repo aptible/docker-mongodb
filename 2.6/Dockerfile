@@ -1,19 +1,30 @@
 FROM quay.io/aptible/debian:wheezy
 
-ENV DATA_DIRECTORY /var/db
+ENV MONGO_VERSION 2.6.11
 
-# Install latest MongoDB from custom package repo
+# Compile and install MongoDB "core"
+ADD ./install-mongodb.sh /install-mongodb.sh
+RUN /install-mongodb.sh
+
+# Install MongoDB tools (we're not compiling those from source)
 ADD templates/mongodb.list /etc/apt/sources.list.d/mongodb.list
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv 7F0CEB10 && \
-    apt-get update && apt-get install -y adduser mongodb-org && mkdir -p "$DATA_DIRECTORY"
+    apt-install "mongodb-org-tools=${MONGO_VERSION}" procps ca-certificates
+
+ENV DATA_DIRECTORY /var/db
+ENV SSL_DIRECTORY /etc/ssl/mongo
+RUN mkdir -p "${DATA_DIRECTORY}" "${SSL_DIRECTORY}"
+
+# Tools
+ADD run-database.sh /usr/bin/
+ADD utilities.sh /usr/bin/
 
 # Integration tests
 ADD test /tmp/test
 RUN bats /tmp/test
 
 VOLUME ["$DATA_DIRECTORY"]
+VOLUME ["$SSL_DIRECTORY"]
 EXPOSE 27017
 
-ADD run-database.sh /usr/bin/
-ADD utilities.sh /usr/bin/
 ENTRYPOINT ["run-database.sh"]
