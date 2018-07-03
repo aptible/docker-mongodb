@@ -1,4 +1,4 @@
-FROM quay.io/aptible/debian:wheezy
+FROM quay.io/aptible/debian:jessie
 
 ENV MONGO_VERSION <%= ENV.fetch "MONGO_VERSION" %>
 ENV MONGO_SHA1SUM <%= ENV.fetch "MONGO_SHA1SUM" %>
