@@ -74,7 +74,7 @@ fi
 
 
 echo "Importing suggested configuration"
-eval "$(docker run -i "$IMG" --discover | python -c "$READ_SUGGESTED_CONFIG_SCRIPT")"
+eval "$(docker run --rm -i "$IMG" --discover | python -c "$READ_SUGGESTED_CONFIG_SCRIPT")"
 
 
 R1_ENV_ARGS+=(
@@ -112,6 +112,7 @@ echo "Initializing data containers"
 for data_container in  "$R1_DATA_CONTAINER" "$R2_DATA_CONTAINER" "$R3_DATA_CONTAINER"; do
   docker create --name "$data_container" "$IMG"
 done
+
 
 # This is here to emulate functional DNS.
 NET_ARGS=(
@@ -158,13 +159,13 @@ quietly docker run -d --name="$R1_CONTAINER" \
 
 
 # Wait until the first node becomes the master
-R1_URL="$(docker run -i "${R1_ENV_ARGS[@]}" "$IMG" --connection-url | python -c "$READ_DATABASE_URL_SCRIPT")"
+R1_URL="$(docker run --rm -i "${R1_ENV_ARGS[@]}" "$IMG" --connection-url | python -c "$READ_DATABASE_URL_SCRIPT")"
 until docker run --rm -i "${NET_ARGS[@]}" "$IMG" --client "$R1_URL" --quiet --eval 'quit(db.isMaster()["ismaster"] ? 0 : 1)'; do sleep 2; done
 
 
 echo "Initializing second member"
-R2_URL="$(docker run -i "${R2_ENV_ARGS[@]}" "$IMG" --connection-url | python -c "$READ_DATABASE_URL_SCRIPT")"
-R2_ADMIN_URL="$(docker run -i "${R2_ENV_ARGS[@]}" -e "DATABASE=admin" "$IMG" --connection-url | python -c "$READ_DATABASE_URL_SCRIPT")"
+R2_URL="$(docker run --rm -i "${R2_ENV_ARGS[@]}" "$IMG" --connection-url | python -c "$READ_DATABASE_URL_SCRIPT")"
+R2_ADMIN_URL="$(docker run --rm -i "${R2_ENV_ARGS[@]}" -e "DATABASE=admin" "$IMG" --connection-url | python -c "$READ_DATABASE_URL_SCRIPT")"
 
 quietly docker run -i --rm \
   "${R2_NET_ARGS[@]}" \
@@ -233,7 +234,7 @@ quietly docker run -d --name="$R3_CONTAINER" \
   --volumes-from "$R3_DATA_CONTAINER" \
   "$IMG"
 
-R3_ADMIN_URL="$(docker run -i "${R3_ENV_ARGS[@]}" -e "DATABASE=admin" "$IMG" --connection-url | python -c "$READ_DATABASE_URL_SCRIPT")"
+R3_ADMIN_URL="$(docker run --rm -i "${R3_ENV_ARGS[@]}" -e "DATABASE=admin" "$IMG" --connection-url | python -c "$READ_DATABASE_URL_SCRIPT")"
 until docker run --rm -i "${NET_ARGS[@]}" "$IMG" --client "$R3_ADMIN_URL" --quiet --eval 'quit(db.isMaster()["secondary"] ? 0 : 1)'; do sleep 2; done
 
 # And now, check that our cluster looks healthy!
