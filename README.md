@@ -26,6 +26,7 @@ The first command sets up a data container named `data` which will hold the conf
 * `3.2`: MongoDB 3.2
 * `3.4`: MongoDB 3.4
 * `3.6`: MongoDB 3.6
+* `4.0`: MongoDB 4.0
 
 ## Tests
 

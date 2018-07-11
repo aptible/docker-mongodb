@@ -67,6 +67,11 @@ wait_for_mongodb() {
   done
 }
 
+start_mongodb() {
+  initialize_mongodb
+  wait_for_mongodb
+}
+
 wait_for_master() {
   local database_url="$1"
   for i in $(seq 10 -1 0); do

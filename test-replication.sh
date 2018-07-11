@@ -113,7 +113,6 @@ for data_container in  "$R1_DATA_CONTAINER" "$R2_DATA_CONTAINER" "$R3_DATA_CONTA
   docker create --name "$data_container" "$IMG"
 done
 
-
 # This is here to emulate functional DNS.
 NET_ARGS=(
   "--net" "$NET_NAME"

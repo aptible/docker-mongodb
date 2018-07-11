@@ -13,8 +13,7 @@ source "${BATS_TEST_DIRNAME}/test_helpers.sh"
 @test "It should successfully backup and restore" {
   test_data="APTIBLE_TEST"
 
-  initialize_mongodb
-  wait_for_mongodb
+  start_mongodb
 
   wait_for_master "$DATABASE_URL"
   run-database.sh --client "$DATABASE_URL" --eval "db.test.insert({\"$test_data\": null})"
@@ -39,8 +38,7 @@ source "${BATS_TEST_DIRNAME}/test_helpers.sh"
 }
 
 @test "It should return a valid connection URL for --connection-url" {
-  initialize_mongodb
-  wait_for_mongodb
+  start_mongodb
 
   USERNAME="$DATABASE_USER" PASSPHRASE="$DATABASE_PASSWORD" DATABASE=db run run-database.sh --connection-url
   [ "$status" -eq "0" ]

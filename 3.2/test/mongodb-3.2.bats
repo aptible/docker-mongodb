@@ -15,8 +15,7 @@ source "${BATS_TEST_DIRNAME}/test_helpers.sh"
 }
 
 @test "It should reject non-SSL connections" {
-  initialize_mongodb
-  wait_for_mongodb
+  start_mongodb
   run run-database.sh --client "$DATABASE_URL_NO_SSL" --eval "$QUERY"
   [ "$status" -ne "0" ]
 }
