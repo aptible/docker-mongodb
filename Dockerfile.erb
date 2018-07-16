@@ -1,4 +1,4 @@
-FROM quay.io/aptible/debian:wheezy
+FROM quay.io/aptible/debian:<%= ENV.fetch "DEBIAN_VERSION" %>
 
 ENV MONGO_VERSION <%= ENV.fetch "MONGO_VERSION" %>
 ENV MONGO_SHA1SUM <%= ENV.fetch "MONGO_SHA1SUM" %>
@@ -6,7 +6,7 @@ ENV MONGO_GPG_KEY <%= ENV.fetch "MONGO_GPG_KEY" %>
 
 # Add MongoDB repository
 ADD <%= ENV.fetch 'TAG' %>/templates/mongodb.list /etc/apt/sources.list.d/mongodb.list
-RUN apt-key adv --keyserver keyserver.ubuntu.com --recv "$MONGO_GPG_KEY"
+RUN apt-install gnupg && apt-key adv --keyserver keyserver.ubuntu.com --recv "$MONGO_GPG_KEY"
 
 # Install MongoDB core
 RUN apt-install adduser
