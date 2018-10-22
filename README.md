@@ -22,7 +22,7 @@ The first command sets up a data container named `data` which will hold the conf
 ## Available Tags
 
 * `latest`: Currently MongoDB 3.6
-* `2.6`: MongoDB 2.6
+* `2.6`: MongoDB 2.6 - [EOL](https://www.mongodb.com/blog/post/mongodb-2-6-end-of-life)
 * `3.2`: MongoDB 3.2
 * `3.4`: MongoDB 3.4
 * `3.6`: MongoDB 3.6
