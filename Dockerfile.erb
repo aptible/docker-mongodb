@@ -1,7 +1,6 @@
 FROM quay.io/aptible/debian:<%= ENV.fetch "DEBIAN_VERSION" %>
 
 ENV MONGO_VERSION <%= ENV.fetch "MONGO_VERSION" %>
-ENV MONGO_SHA1SUM <%= ENV.fetch "MONGO_SHA1SUM" %>
 ENV MONGO_GPG_KEY <%= ENV.fetch "MONGO_GPG_KEY" %>
 
 # Add MongoDB repository
@@ -10,7 +9,7 @@ RUN apt-install gnupg && apt-key adv --keyserver keyserver.ubuntu.com --recv "$M
 
 # Install MongoDB core
 RUN apt-install adduser
-ADD <%= ENV.fetch 'TAG' %>/install-mongodb.sh /install-mongodb.sh
+ADD bin/install-mongodb.sh /install-mongodb.sh
 RUN /install-mongodb.sh
 
 # Install MongoDB tools and utilities we need
