@@ -193,7 +193,7 @@ if docker logs "$R1_CONTAINER" | grep "relinquishing primary"; then
 fi
 
 # But also check that R1 noticed R2 was down. The log message differs in Mongo
-# 2.6, 3.2, so we test for both (2.6 first, then 3.2)
+# 3.4 and 3.6+, so we test for both (3.6+ first, then 3.5)
 if ! docker logs "$R1_CONTAINER" | grep -E "${R2_CONTAINER}:${R2_PORT} is now in state (DOWN|RS_DOWN)"; then
   if ! docker logs "$R1_CONTAINER" | grep "${R2_CONTAINER}:${R2_PORT}; ExceededTimeLimit"; then
     # This isn't technically a test *failure*. However, we were unable to *demonstrate* that the
