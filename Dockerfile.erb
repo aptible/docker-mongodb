@@ -4,8 +4,9 @@ ENV MONGO_VERSION <%= ENV.fetch "MONGO_VERSION" %>
 ENV MONGO_GPG_KEY <%= ENV.fetch "MONGO_GPG_KEY" %>
 
 # Add MongoDB repository
+RUN apt-install gnupg
 ADD <%= ENV.fetch 'TAG' %>/templates/mongodb.list /etc/apt/sources.list.d/mongodb.list
-RUN apt-install gnupg && apt-key adv --keyserver keyserver.ubuntu.com --recv "$MONGO_GPG_KEY"
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv "$MONGO_GPG_KEY"
 
 # Install MongoDB core
 RUN apt-install adduser
