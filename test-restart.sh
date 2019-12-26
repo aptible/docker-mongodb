@@ -75,7 +75,7 @@ docker logs "$MONGO_CONTAINER" 2>&1 | grep -vqiE "(this node is.*in the config|r
 echo "Restarting DB container"
 date
 docker top "$MONGO_CONTAINER"
-docker restart -t 10 "$MONGO_CONTAINER"
+docker restart -t 20 "$MONGO_CONTAINER"
 
 echo "Waiting for DB to come back online"
 wait_for_mongo "$MONGO_CONTAINER"
