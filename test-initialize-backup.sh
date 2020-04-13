@@ -92,7 +92,7 @@ docker run --rm -i "${FIRST_RUN_NET_OPTS[@]}" "$IMG" --client "$MONGO_FIRST_URL"
   --quiet --eval "db.test.insert({ 'FOO': 'CANARY' }, { w: 1, j: true});"
 
 echo "Stop DB"
-docker stop "$MONGO_CONTAINER"
+docker stop -t 20 "$MONGO_CONTAINER"
 docker rm "$MONGO_CONTAINER"
 
 echo "Initialize restore"

@@ -192,13 +192,16 @@ if docker logs "$R1_CONTAINER" | grep "relinquishing primary"; then
   exit 1
 fi
 
-# But also check that R1 noticed R2 was down.
-if ! docker logs "$R1_CONTAINER" | grep "${R2_CONTAINER}:${R2_PORT}; ExceededTimeLimit"; then
-  # This isn't technically a test *failure*. However, we were unable to *demonstrate* that the
-  # system reacted properly to R2 going down for a restart, so we have to abort.
-  docker logs "$R1_CONTAINER"
-  echo "${R1_CONTAINER} did not realize that ${R2_CONTAINER} went down - aborting test"
-  exit 1
+# But also check that R1 noticed R2 was down. The log message differs in Mongo
+# 3.4 and 3.6+, so we test for both (3.6+ first, then 3.5)
+if ! docker logs "$R1_CONTAINER" | grep -E "${R2_CONTAINER}:${R2_PORT} is now in state (DOWN|RS_DOWN)"; then
+  if ! docker logs "$R1_CONTAINER" | grep "${R2_CONTAINER}:${R2_PORT}; NetworkInterfaceExceededTimeLimit"; then
+    # This isn't technically a test *failure*. However, we were unable to *demonstrate* that the
+    # system reacted properly to R2 going down for a restart, so we have to abort.
+    docker logs "$R1_CONTAINER"
+    echo "${R1_CONTAINER} did not realize that ${R2_CONTAINER} went down - aborting test"
+    exit 1
+  fi
 fi
 
 docker run -d --name "$R2_CONTAINER" \
