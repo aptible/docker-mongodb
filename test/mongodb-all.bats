@@ -109,3 +109,16 @@ source "${BATS_TEST_DIRNAME}/test_helpers.sh"
   [ -f "${SSL_DIRECTORY}/mongodb.crt" ]
   [ -f "${SSL_DIRECTORY}/mongodb.key" ]
 }
+
+@test "It should use an appropirately licensed version of MongoDB" {
+
+  if [[ "$TAG" =~ .*-ea ]]; then
+    start_mongodb
+    grep "modules: enterprise" $BATS_TEST_DIRNAME/mongodb.log
+  else
+    start_mongodb
+    grep "modules: none" $BATS_TEST_DIRNAME/mongodb.log
+    ! zgrep "Server Side Public License" /usr/share/doc/mongodb-org-server/LICENSE-Community.txt.gz
+    [[ -f /usr/share/doc/mongodb-org-server/GNU-AGPL-3.0.gz ]]
+  fi
+}

@@ -1,6 +1,7 @@
 FROM quay.io/aptible/debian:<%= ENV.fetch "DEBIAN_VERSION" %>
 
 ENV MONGO_VERSION <%= ENV.fetch "MONGO_VERSION" %>
+ENV MONGO_FLAVOR <%= ENV.fetch "MONGO_FLAVOR" %>
 ENV MONGO_GPG_KEY <%= ENV.fetch "MONGO_GPG_KEY" %>
 
 # Add MongoDB repository
@@ -14,7 +15,7 @@ ADD bin/install-mongodb.sh /install-mongodb.sh
 RUN /install-mongodb.sh
 
 # Install MongoDB tools and utilities we need
-RUN apt-install "mongodb-org-tools=${MONGO_VERSION}" procps ca-certificates python pwgen
+RUN apt-install "mongodb-${MONGO_FLAVOR}-tools=${MONGO_VERSION}" procps ca-certificates python pwgen
 
 # Configuration
 ENV MONGO_SSL_MODE <%= ENV.fetch "MONGO_SSL_MODE" %>
@@ -37,5 +38,7 @@ ADD test /tmp/test
 VOLUME ["$DATA_DIRECTORY"]
 VOLUME ["$SSL_DIRECTORY"]
 EXPOSE 27017
+
+ENV TAG <%= ENV.fetch 'TAG' %>
 
 ENTRYPOINT ["run-database.sh"]

@@ -22,14 +22,21 @@ The first command sets up a data container named `data` which will hold the conf
 ## Available Tags
 
 * `latest`: Currently MongoDB 4.0
-* `4.0`: MongoDB 4.0
-* `3.6`: MongoDB 3.6
-* `3.4`: MongoDB 3.4 - EOL in [January 2020](https://www.mongodb.com/support-policy)
+* `4.0`: MongoDB 4.0 APGL
+* `3.6`: MongoDB 3.6 APGL
+
+## End of Life Tags
+
+* `3.4`: MongoDB 3.4 APGL - EOL [January 2020](https://www.mongodb.com/support-policy)
 
 ## Deprecated Tags
 
 * `2.6`: MongoDB 2.6 - [DEPRECATED](https://www.aptible.com/documentation/deploy/reference/databases/version-support.html)
 * `3.2`: MongoDB 3.2 - [DEPRECATED](https://www.aptible.com/documentation/deploy/reference/databases/version-support.html)
+
+## Flavors
+
+The tags adorned with `-ea` are Enterprise versions.
 
 ## Tests
 
