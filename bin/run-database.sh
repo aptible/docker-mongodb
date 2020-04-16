@@ -168,7 +168,7 @@ function mongo_exec_foreground_exposed () {
     "--dbpath" "$DATA_DIRECTORY"
     "--bind_ip" "0.0.0.0"
     "--port" "$PORT"
-    "--sslMode" "$MONGO_SSL_MODE"
+    "--sslMode" "requireSSL"
     "--sslPEMKeyFile" "$SSL_BUNDLE_FILE"
     "--auth"
   )
@@ -260,7 +260,7 @@ function mongo_start_background_exposed () {
     --pidfilepath "$pidPath" \
     --replSet "$replSet" \
     --auth \
-    --sslMode "$MONGO_SSL_MODE" \
+    --sslMode "requireSSL" \
     --sslPEMKeyFile "$SSL_BUNDLE_FILE"
 
   mongo_wait_exposed
@@ -478,7 +478,7 @@ elif [[ "$1" == "--initialize-from" ]]; then
     --fork --logpath "$LOG_PATH" --pidfilepath "$PID_PATH" \
     --replSet "$REPL_SET_NAME" \
     --keyFile "$CLUSTER_KEY_FILE" \
-    --sslMode "$MONGO_SSL_MODE" --sslPEMKeyFile "$SSL_BUNDLE_FILE" \
+    --sslMode "requireSSL" --sslPEMKeyFile "$SSL_BUNDLE_FILE" \
     --auth
 
   # Initate replication, from the primary Point it to the new replica we just launched.

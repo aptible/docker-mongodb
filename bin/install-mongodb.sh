@@ -7,8 +7,8 @@ set -o nounset
 # specify versions for the packages it depends on).
 
 apt-install \
-  "mongodb-org=${MONGO_VERSION}" \
-  "mongodb-org-server=${MONGO_VERSION}" \
-  "mongodb-org-shell=${MONGO_VERSION}" \
-  "mongodb-org-mongos=${MONGO_VERSION}" \
-  "mongodb-org-tools=${MONGO_VERSION}"
+  "mongodb-${MONGO_FLAVOR}=${MONGO_VERSION}" \
+  "mongodb-${MONGO_FLAVOR}-server=${MONGO_VERSION}" \
+  "mongodb-${MONGO_FLAVOR}-shell=${MONGO_VERSION}" \
+  "mongodb-${MONGO_FLAVOR}-mongos=${MONGO_VERSION}" \
+  "mongodb-${MONGO_FLAVOR}-tools=${MONGO_VERSION}"

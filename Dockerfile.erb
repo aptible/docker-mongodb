@@ -1,10 +1,12 @@
 FROM quay.io/aptible/debian:<%= ENV.fetch "DEBIAN_VERSION" %>
 
 ENV MONGO_VERSION <%= ENV.fetch "MONGO_VERSION" %>
+ENV MONGO_FLAVOR <%= ENV.fetch "MONGO_FLAVOR" %>
 ENV MONGO_GPG_KEY <%= ENV.fetch "MONGO_GPG_KEY" %>
+ENV TAG <%= ENV.fetch "TAG" %>
 
 # Add MongoDB repository
-ADD <%= ENV.fetch 'TAG' %>/templates/mongodb.list /etc/apt/sources.list.d/mongodb.list
+ADD "${TAG}/templates/mongodb.list" /etc/apt/sources.list.d/mongodb.list
 RUN apt-install gnupg && apt-key adv --keyserver keyserver.ubuntu.com --recv "$MONGO_GPG_KEY"
 
 # Install MongoDB core
@@ -13,10 +15,9 @@ ADD bin/install-mongodb.sh /install-mongodb.sh
 RUN /install-mongodb.sh
 
 # Install MongoDB tools and utilities we need
-RUN apt-install "mongodb-org-tools=${MONGO_VERSION}" procps ca-certificates python pwgen
+RUN apt-install "mongodb-${MONGO_FLAVOR}-tools=${MONGO_VERSION}" procps ca-certificates python pwgen
 
 # Configuration
-ENV MONGO_SSL_MODE <%= ENV.fetch "MONGO_SSL_MODE" %>
 ENV DATA_DIRECTORY /var/db
 ENV SSL_DIRECTORY /etc/ssl/mongo
 RUN mkdir -p "${DATA_DIRECTORY}" "${SSL_DIRECTORY}"
@@ -30,7 +31,7 @@ ADD bin/autotune /usr/local/bin/
 ADD templates/mongo-scripts /mongo-scripts
 
 # Unit tests (executed by test.sh)
-ADD <%= ENV.fetch 'TAG' %>/test /tmp/test
+ADD "${TAG}/test" /tmp/test
 ADD test /tmp/test
 
 VOLUME ["$DATA_DIRECTORY"]
