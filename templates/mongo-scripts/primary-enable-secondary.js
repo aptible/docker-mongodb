@@ -8,7 +8,7 @@ var member;
 for (var i = 0; i < conf["members"].length; i++) {
   member = conf["members"][i];
   if (member.host === secondary_name ) {
-    member.priority = 1;
+    member.priority = 0.5;
     member.votes = 1;
   }
 }
