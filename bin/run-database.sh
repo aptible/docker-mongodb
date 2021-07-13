@@ -272,6 +272,10 @@ function mongo_shutdown_background () {
   # Terminate MongoDB and wait for it to exit
   kill "$(cat "$pidPath")"
   while [ -s "${DATA_DIRECTORY}/mongod.lock" ]; do sleep 0.1; done
+
+  # This above does not always ensure Mongo has fully exited, and we see this error at times:
+  # [initandlisten] Failed to set up listener: SocketException: Address already in use
+  sleep 3
 }
 
 dump_directory="mongodump"
