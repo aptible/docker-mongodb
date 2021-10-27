@@ -260,6 +260,7 @@ function mongo_start_background_exposed () {
     --pidfilepath "$pidPath" \
     --replSet "$replSet" \
     --auth \
+    --keyFile "$CLUSTER_KEY_FILE" \
     --sslMode "requireSSL" \
     --sslPEMKeyFile "$SSL_BUNDLE_FILE"
 
