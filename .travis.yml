@@ -12,7 +12,10 @@ env:
     - TAG=3.6-ea
     - TAG=4.0
     - TAG=4.0-ea
-    
+    - TAG=4.2-ea
+    - TAG=4.4-ea
+    - TAG=5.0-ea
+
 script:
   - make build
   - make test
