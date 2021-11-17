@@ -3,7 +3,6 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-
 # shellcheck disable=SC1091
 . /usr/bin/utilities.sh
 
@@ -20,6 +19,10 @@ MEMBER_ID_FILE="${DATA_DIRECTORY}/.aptible-member-id"
 PRE_START_FILE="${DATA_DIRECTORY}/.aptible-on-start"
 
 SSL_BUNDLE_FILE="${SSL_DIRECTORY}/mongodb.pem"
+
+# Starting in MongoDB 4.2 SSL options are deprecated. Use TLS options instead.
+SSL_TLS="$(dpkg --compare-versions "$MONGO_VERSION" ge 4.2 && echo "tls" || echo "ssl")"
+SSL_TLS_KEY_FILE_ARG="$([[ "$SSL_TLS" = "tls" ]] && echo "tlsCertificateKeyFile" || echo "sslPEMKeyFile")"
 
 function mongo_init_debug () {
   # shellcheck disable=2086
@@ -102,7 +105,7 @@ function mongo_environment_require_cluster_key () {
   # participate in.
 
   # shellcheck disable=2086
-  : ${CLUSTER_KEY:?"CLUSTER_KEY must be set in the environment"}
+  : ${CLUSTER_KEY:?"CLUSTER_KEY must be set in the envirxonment"}
 }
 
 
@@ -168,8 +171,8 @@ function mongo_exec_foreground_exposed () {
     "--dbpath" "$DATA_DIRECTORY"
     "--bind_ip" "0.0.0.0"
     "--port" "$PORT"
-    "--sslMode" "requireSSL"
-    "--sslPEMKeyFile" "$SSL_BUNDLE_FILE"
+    "--${SSL_TLS}Mode" "require${SSL_TLS^^}"
+    "--${SSL_TLS_KEY_FILE_ARG}" "$SSL_BUNDLE_FILE"
     "--auth"
   )
 
@@ -200,11 +203,11 @@ function mongo_exposed_connection_options {
     "--username" "$USERNAME"
     "--password" "$PASSPHRASE"
     "--authenticationDatabase" "admin"
-    "--ssl"
+    "--${SSL_TLS}"
   )
 
   if [[ -n "${INITIALIZATION_ALLOW_INVALID_CERTIFICATES:-}" ]]; then
-    opts+=("--sslAllowInvalidCertificates")
+    opts+=("--${SSL_TLS}AllowInvalidCertificates")
   fi
 
   echo "${opts[@]}"
@@ -260,8 +263,9 @@ function mongo_start_background_exposed () {
     --pidfilepath "$pidPath" \
     --replSet "$replSet" \
     --auth \
-    --sslMode "requireSSL" \
-    --sslPEMKeyFile "$SSL_BUNDLE_FILE"
+    --keyFile "$CLUSTER_KEY_FILE" \
+    "--${SSL_TLS}Mode" "require${SSL_TLS^^}" \
+    "--${SSL_TLS_KEY_FILE_ARG}" "$SSL_BUNDLE_FILE"
 
   mongo_wait_exposed
 }
@@ -482,7 +486,7 @@ elif [[ "$1" == "--initialize-from" ]]; then
     --fork --logpath "$LOG_PATH" --pidfilepath "$PID_PATH" \
     --replSet "$REPL_SET_NAME" \
     --keyFile "$CLUSTER_KEY_FILE" \
-    --sslMode "requireSSL" --sslPEMKeyFile "$SSL_BUNDLE_FILE" \
+    "--${SSL_TLS}Mode" "require${SSL_TLS^^}" "--${SSL_TLS_KEY_FILE_ARG}" "$SSL_BUNDLE_FILE" \
     --auth
 
   # Initate replication, from the primary Point it to the new replica we just launched.
@@ -538,7 +542,7 @@ elif [[ "$1" == "--connection-url" ]]; then
   mongo_environment_full
   cat <<EOM
 {
-  "url": "mongodb://${USERNAME}:${PASSPHRASE}@${EXPOSE_HOST}:${!EXPOSE_PORT_PTR}/${DATABASE}?ssl=true"
+  "url": "mongodb://${USERNAME}:${PASSPHRASE}@${EXPOSE_HOST}:${!EXPOSE_PORT_PTR}/${DATABASE}?${SSL_TLS}=true"
 }
 EOM
 
@@ -562,7 +566,9 @@ elif [[ "$1" == "--dump" ]]; then
   # https://jira.mongodb.org/browse/SERVER-7860
   # Can't dump the whole database to stdout in a straightforward way. Instead,
   # dump to a directory and then tar the directory and print the tar to stdout.
-  parse_url "$2"
+
+  # mongodump does not support --tls options so use --ssl instead
+  parse_url --ssl-opts "$2"
 
   mongodump "${mongo_options[@]}" --db="$database" --out="/tmp/${dump_directory}" > /dev/null && tar cf - -C /tmp/ "$dump_directory"
 
@@ -572,7 +578,8 @@ elif [[ "$1" == "--restore" ]]; then
     exit 1
   fi
   tar xf - -C /tmp/
-  parse_url "$2"
+  # mongorestore does not support --tls options so use --ssl instead
+  parse_url --ssl-opts "$2"
   mongorestore "${mongo_options[@]}" --db="$database" "/tmp/${dump_directory}/${database}"
 
 elif [[ "$1" == "--readonly" ]]; then

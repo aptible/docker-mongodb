@@ -69,8 +69,10 @@ echo "Waiting for DB to come online"
 wait_for_mongo "$MONGO_CONTAINER"
 
 echo "Verifying DB shutdown message isn't present"
-docker logs "$MONGO_CONTAINER" 2>&1 | grep -vqiE "dbexit.*(rc: 0|really exit)"
-docker logs "$MONGO_CONTAINER" 2>&1 | grep -vqiE "(this node is.*in the config|replSet I am)"
+exit_regex='(dbexit.*(rc: 0|really exit))|(shutting down( with code:0|.*"exitCode":0))'
+recovery_regex="(recovering data from the last clean checkpoint|recover done)"
+docker logs "$MONGO_CONTAINER" 2>&1 | nogrep -iE "$exit_regex"
+docker logs "$MONGO_CONTAINER" 2>&1 | nogrep -iE "$recovery_regex"
 
 echo "Restarting DB container"
 date
@@ -82,9 +84,9 @@ wait_for_mongo "$MONGO_CONTAINER"
 
 echo "DB came back online; checking for clean shutdown and recovery"
 date
-docker logs "$MONGO_CONTAINER" 2>&1 | grep -qiE "(dbexit.*(rc: 0|really exit))|(shutting down with code:0)"
-docker logs "$MONGO_CONTAINER" 2>&1 | grep -qiE "(this node is.*in the config|replSet I am)"
-docker logs "$MONGO_CONTAINER" 2>&1 | grep -vqiE "(recovering data from the last clean checkpoint|recover done)"
+docker logs "$MONGO_CONTAINER" 2>&1 | grep -qiE "$exit_regex"
+docker logs "$MONGO_CONTAINER" 2>&1 | grep -qiE "(this node is.*in the config|replSet I am|Found self in config)"
+docker logs "$MONGO_CONTAINER" 2>&1 | nogrep -iE "$recovery_regex"
 
 echo "Attempting unclean shutdown"
 docker kill -s KILL "$MONGO_CONTAINER"
@@ -92,4 +94,4 @@ docker start "$MONGO_CONTAINER"
 
 echo "Waiting for DB to come back online"
 wait_for_mongo "$MONGO_CONTAINER"
-docker logs "$MONGO_CONTAINER" 2>&1 | grep -qiE "(recovering data from the last clean checkpoint|recover done)"
+docker logs "$MONGO_CONTAINER" 2>&1 | grep -qiE "$recovery_regex"

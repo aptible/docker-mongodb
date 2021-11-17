@@ -141,11 +141,11 @@ source "${BATS_TEST_DIRNAME}/test_helpers.sh"
   run-database.sh --client "$ADMIN_DATABASE_URL" --eval "$PRINT_RAM_QUERY" | grep 1024
 }
 
-@test "It should use an appropirately licensed version of MongoDB" {
+@test "It should use an appropriately licensed version of MongoDB" {
 
   if [[ "$TAG" =~ .*-ea ]]; then
     start_mongodb
-    grep "modules: enterprise" $BATS_TEST_DIRNAME/mongodb.log
+    grep -E '(modules: enterprise|"modules":\["enterprise"\])' $BATS_TEST_DIRNAME/mongodb.log
   else
     start_mongodb
     grep "modules: none" $BATS_TEST_DIRNAME/mongodb.log

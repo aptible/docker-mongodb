@@ -18,3 +18,11 @@ function quietly {
     return "$status"
   fi
 }
+
+# Invert's the return code of grep i.e. check that there is no match
+# (! grep ...) works on Ubuntu but not on OSX
+# This function works on both platforms
+nogrep() {
+  ! grep "$@"
+  return $?
+}

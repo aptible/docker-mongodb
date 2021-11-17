@@ -2,7 +2,7 @@
 
 source "${BATS_TEST_DIRNAME}/test_helpers.sh"
 
-version='4.0.27'
+version='4.2.17'
 
 @test "It should install mongod ${version}" {
   run mongod --version
